@@ -9,3 +9,5 @@ Discover, rate, and review your favorite music with our collaborative Music Rati
 Harry Salami
 
 Ozzy Jatta
+
+chris
