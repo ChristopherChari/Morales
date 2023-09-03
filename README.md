@@ -8,3 +8,4 @@ Discover, rate, and review your favorite music with our collaborative Music Rati
 ### Members 
 Harry Salami
 
+Ozzy Jatta
