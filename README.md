@@ -7,4 +7,4 @@ Discover, rate, and review your favorite music with our collaborative Music Rati
 =======
 ### Members 
 Harry Salami
->>>>>>> 2ecc74d04aa0859b09c4564770a461cdecdbaf43
+
