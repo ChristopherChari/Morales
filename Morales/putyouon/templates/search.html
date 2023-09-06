@@ -1,0 +1,33 @@
+<!-- templates/search_results.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+
+    <!-- Search Form -->
+    <form method="get" action="{% url 'search_spotify' query=query|default:'' %}">
+        <label for="query">Search for a track:</label>
+        <input type="text" id="query" name="query" placeholder="Enter track name" value="{{ query }}">
+        <button type="submit">Search</button>
+    </form>
+
+    <!-- Search Results -->
+    {% if search_results %}
+        <h2>Results:</h2>
+        <ul>
+            {% for result in search_results.tracks.items %}
+                <li>
+                    <strong>{{ result.name }}</strong> by {{ result.artists.0.name }}
+                    <a href="{{ result.external_urls.spotify }}" target="_blank">Listen on Spotify</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No results found.</p>
+    {% endif %}
+</body>
+</html>

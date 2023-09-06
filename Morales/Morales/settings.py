@@ -37,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    "putyouon"
+    "putyouon",
+    'django_extensions'
 ]
 
 MIDDLEWARE = [
@@ -100,6 +101,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+SPOTIFY_API = {
+    'CLIENT_ID': '24c692c91f1e42bcb182c7655b558ba4',
+    'CLIENT_SECRET': '5fb4f1c23dca40c48e3ae4de5f18353d',
+}
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

@@ -1,0 +1,20 @@
+<!-- templates/search_results.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Results</title>
+</head>
+<body>
+    <h1>Search Results</h1>
+
+    <ul>
+        {% for track in tracks %}
+            <li>
+                <strong>{{ track.name }}</strong> by {{ track.artists.0.name }}
+                <a href="{{ track.external_urls.spotify }}" target="_blank">Listen on Spotify</a>
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
