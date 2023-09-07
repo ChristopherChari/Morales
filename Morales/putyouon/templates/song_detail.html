@@ -1,0 +1,24 @@
+<!-- templates/song_detail.html -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Song Detail</title>
+</head>
+<body>
+    <h1>Song Detail</h1>
+
+    <div class="song-details">
+        <div class="album-cover">
+            <img src="{{ song.album.images.0.url }}" alt="{{ song.album.name }} Album Cover">
+        </div>
+        <div class="song-info">
+            <p><strong>Name:</strong> {{ song.name }}</p>
+            <p><strong>Artist:</strong> {{ song.artists.0.name }}</p>
+            <p><strong>Album:</strong> {{ song.album.name }}</p>
+            <p><strong>Release Date:</strong> {{ song.album.release_date }}</p>
+            <!-- Add more details as needed -->
+        </div>
+    </div>
+</body>
+</html>

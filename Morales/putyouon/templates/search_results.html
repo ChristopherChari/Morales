@@ -12,7 +12,7 @@
         {% for track in tracks %}
             <li>
                 <strong>{{ track.name }}</strong> by {{ track.artists.0.name }}
-                <a href="{{ track.external_urls.spotify }}" target="_blank">Listen on Spotify</a>
+                <a href="{% url 'song_detail' track.id %}">View Details</a>
             </li>
         {% endfor %}
     </ul>

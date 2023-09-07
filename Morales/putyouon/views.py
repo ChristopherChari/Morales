@@ -83,3 +83,17 @@ def search_spotify(request, query):
     tracks = results.get('tracks', {}).get('items', [])
 
     return render(request, 'search_results.html', {'tracks': tracks})
+
+
+def song_detail(request, song_id):
+    # Initialize Spotify client
+    client_credentials_manager = SpotifyClientCredentials(
+        client_id=settings.SPOTIFY_API['CLIENT_ID'],
+        client_secret=settings.SPOTIFY_API['CLIENT_SECRET']
+    )
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+    # Retrieve song details using the song_id
+    song = sp.track(song_id)
+
+    return render(request, 'song_detail.html', {'song': song})
