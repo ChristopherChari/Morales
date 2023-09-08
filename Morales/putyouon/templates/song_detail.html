@@ -19,6 +19,11 @@
             <p><strong>Release Date:</strong> {{ song.album.release_date }}</p>
             <!-- Add more details as needed -->
         </div>
+
+        <form method="post" action="{% url 'like_song' song_id=song_id %}">
+            {% csrf_token %}
+            <button type="submit">Like</button>
+        </form>
     </div>
 </body>
 </html>

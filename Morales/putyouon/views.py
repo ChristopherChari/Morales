@@ -16,7 +16,9 @@ import requests
 from .forms import CustomUserCreationForm 
 
 from spotipy.oauth2 import SpotifyOAuth
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .models import Song, Like, Review
+from .forms import ReviewForm
 
 # Create your views here.
 def home(request):
@@ -95,5 +97,31 @@ def song_detail(request, song_id):
 
     # Retrieve song details using the song_id
     song = sp.track(song_id)
+    
+    # Include the song_id in the context dictionary
+    context = {
+        'song': song,
+        'song_id': song_id,  # Include the song_id in the context
+        'form': ReviewForm(),  # Include an empty ReviewForm in the context for the review form
+    }
 
-    return render(request, 'song_detail.html', {'song': song})
+    return render(request, 'song_detail.html', context)
+
+def like_song(request, song_id):
+    if request.method == 'POST':
+        # Check if the user is logged in
+        if request.user.is_authenticated:
+            # Get the song object
+            song = Song.objects.get(song_id=song_id)
+
+            # Check if the user has already liked the song
+            if not Like.objects.filter(user=request.user, song_id=song_id).exists():
+                # Create a new Like object
+                Like.objects.create(user=request.user, song_id=song_id)
+        else:
+            # Redirect the user to the login page or show a message
+            # You can customize this part based on your preference
+            return redirect('login')
+
+    # Redirect the user back to the song detail page
+    return redirect('song_detail', song_id=song_id)
