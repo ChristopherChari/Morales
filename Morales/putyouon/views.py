@@ -19,6 +19,8 @@ from spotipy.oauth2 import SpotifyOAuth
 from django.shortcuts import render, redirect
 from .models import Song, Like, Review
 from .forms import ReviewForm
+from django.http import Http404
+
 
 # Create your views here.
 def home(request):
@@ -64,12 +66,45 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
 
 def profile_view(request):
-    return render(request, 'profile.html')
+    
+    reviews = Review.objects.filter(user=request.user)
+    
+    # Initialize Spotify client
+    client_credentials_manager = SpotifyClientCredentials(
+        client_id=settings.SPOTIFY_API['CLIENT_ID'],
+        client_secret=settings.SPOTIFY_API['CLIENT_SECRET']
+    )
+    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
+    # Create an empty list to store song details for the user's reviews
+    reviewed_songs = []
+
+    # Fetch song details for each review
+    for review in reviews:
+        try:
+            song_details = sp.track(review.song_id)
+        except spotipy.exceptions.SpotifyException as e:
+            # Handle exceptions here if needed
+            song_details = None
+
+        # Append the song details to the list
+        reviewed_songs.append(song_details)
+
+    # Include other profile information as needed
+    # ...
+
+    context = {
+        'reviews': reviews,
+        'reviewed_songs': reviewed_songs,  # Include the song details in the context
+        # Add other profile information here
+    }
+
+    return render(request, 'profile.html', context)
+    
 
 # views.py
 
 # views.py
-
 def search_spotify(request, query):
     # Initialize Spotify client
     client_credentials_manager = SpotifyClientCredentials(
@@ -86,7 +121,6 @@ def search_spotify(request, query):
 
     return render(request, 'search_results.html', {'tracks': tracks})
 
-
 def song_detail(request, song_id):
     # Initialize Spotify client
     client_credentials_manager = SpotifyClientCredentials(
@@ -95,15 +129,31 @@ def song_detail(request, song_id):
     )
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-    # Retrieve song details using the song_id
-    song = sp.track(song_id)
-    
-    # Include the song_id in the context dictionary
+    try:
+        # Retrieve song details using the song_id
+        song = sp.track(song_id)
+    except spotipy.exceptions.SpotifyException as e:
+        # Handle exceptions here if needed
+        song = None
+
+    # Include the song_id and an empty ReviewForm in the context dictionary
     context = {
         'song': song,
-        'song_id': song_id,  # Include the song_id in the context
-        'form': ReviewForm(),  # Include an empty ReviewForm in the context for the review form
+        'song_id': song_id,
+        'form': ReviewForm(),
     }
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            # Save the review to the database
+            review = form.save(commit=False)
+            review.user = request.user
+            review.song_id = song_id  # Associate the review with the song_id
+            review.save()
+            # Redirect or return a success response
+        
+            # Handle the case where the form is not valid
 
     return render(request, 'song_detail.html', context)
 
@@ -125,3 +175,5 @@ def like_song(request, song_id):
 
     # Redirect the user back to the song detail page
     return redirect('song_detail', song_id=song_id)
+
+from .forms import ReviewForm

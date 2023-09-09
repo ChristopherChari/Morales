@@ -1,29 +1,64 @@
-<!-- templates/song_detail.html -->
-
 <!DOCTYPE html>
 <html>
 <head>
     <title>Song Detail</title>
+    <style>
+        /* Add CSS styles for the review section here */
+        .song-details {
+            display: flex;
+            align-items: center;
+        }
+        .album-cover {
+            flex: 1;
+        }
+        .song-info {
+            flex: 2;
+            padding: 20px;
+        }
+        .reviews {
+            flex: 1;
+            padding: 20px;
+        }
+    </style>
 </head>
 <body>
     <h1>Song Detail</h1>
 
     <div class="song-details">
         <div class="album-cover">
-            <img src="{{ song.album.images.0.url }}" alt="{{ song.album.name }} Album Cover">
+            {% if song %}
+                <img src="{{ song.album.images.0.url }}" alt="{{ song.album.name }} Album Cover">
+            {% else %}
+                <p>No song details available.</p>
+            {% endif %}
         </div>
         <div class="song-info">
-            <p><strong>Name:</strong> {{ song.name }}</p>
-            <p><strong>Artist:</strong> {{ song.artists.0.name }}</p>
-            <p><strong>Album:</strong> {{ song.album.name }}</p>
-            <p><strong>Release Date:</strong> {{ song.album.release_date }}</p>
-            <!-- Add more details as needed -->
+            {% if song %}
+                <p><strong>Name:</strong> {{ song.name }}</p>
+                <p><strong>Artist:</strong> {{ song.artists.0.name }}</p>
+                <p><strong>Album:</strong> {{ song.album.name }}</p>
+                <p><strong>Release Date:</strong> {{ song.album.release_date }}</p>
+                <!-- Add more details as needed -->
+            {% else %}
+                <p>No song details available.</p>
+            {% endif %}
         </div>
-
-        <form method="post" action="{% url 'like_song' song_id=song_id %}">
-            {% csrf_token %}
-            <button type="submit">Like</button>
-        </form>
+        <div class="reviews">
+            <h2>Reviews</h2>
+            <!-- Loop through and display reviews here -->
+            {% for review in reviews %}
+                <p><strong>User:</strong> {{ review.user.username }}</p>
+                <p><strong>Review:</strong> {{ review.review_text }}</p>
+                <p><strong>Created At:</strong> {{ review.created_at }}</p>
+            {% endfor %}
+        
+            <!-- Add a form to submit a new review -->
+            <form method="post" action="">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Submit Review</button>
+            </form>
+        </div>        
     </div>
 </body>
 </html>
