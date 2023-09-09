@@ -1,3 +1,5 @@
+<!-- templates/song_detail.html -->
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -19,6 +21,9 @@
             flex: 1;
             padding: 20px;
         }
+        .edited-tag {
+            color: red;  /* You can style the "edited" tag as needed */
+        }
     </style>
 </head>
 <body>
@@ -26,22 +31,14 @@
 
     <div class="song-details">
         <div class="album-cover">
-            {% if song %}
-                <img src="{{ song.album.images.0.url }}" alt="{{ song.album.name }} Album Cover">
-            {% else %}
-                <p>No song details available.</p>
-            {% endif %}
+            <img src="{{ song.album.images.0.url }}" alt="{{ song.album.name }} Album Cover">
         </div>
         <div class="song-info">
-            {% if song %}
-                <p><strong>Name:</strong> {{ song.name }}</p>
-                <p><strong>Artist:</strong> {{ song.artists.0.name }}</p>
-                <p><strong>Album:</strong> {{ song.album.name }}</p>
-                <p><strong>Release Date:</strong> {{ song.album.release_date }}</p>
-                <!-- Add more details as needed -->
-            {% else %}
-                <p>No song details available.</p>
-            {% endif %}
+            <p><strong>Name:</strong> {{ song.name }}</p>
+            <p><strong>Artist:</strong> {{ song.artists.0.name }}</p>
+            <p><strong>Album:</strong> {{ song.album.name }}</p>
+            <p><strong>Release Date:</strong> {{ song.album.release_date }}</p>
+            <!-- Add more details as needed -->
         </div>
         <div class="reviews">
             <h2>Reviews</h2>
@@ -49,16 +46,15 @@
             {% for review in reviews %}
                 <p><strong>User:</strong> {{ review.user.username }}</p>
                 <p><strong>Review:</strong> {{ review.review_text }}</p>
-                <p><strong>Created At:</strong> {{ review.created_at }}</p>
+                <p><strong>Created At:</strong> {{ updated_created_at|date:"F d, Y, H:i A" }}{% if review.edited %} <span class="edited-tag">(Edited)</span>{% endif %}</p>
             {% endfor %}
         
             <!-- Add a form to submit a new review -->
             <form method="post" action="">
                 {% csrf_token %}
-                {{ form.as_p }}
+                <textarea name="review_text" rows="4" cols="50" placeholder="Write a review"></textarea>
                 <button type="submit">Submit Review</button>
             </form>
         </div>        
     </div>
 </body>
-</html>

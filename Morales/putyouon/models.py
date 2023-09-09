@@ -22,6 +22,8 @@ class Review(models.Model):
     song_id = models.CharField(max_length=50)
     review_text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    edited = models.BooleanField(default=False)  # Add an 'edited' field
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f'{self.user.username} liked {self.song_id} at {self.created_at}'

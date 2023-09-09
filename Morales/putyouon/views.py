@@ -23,7 +23,6 @@ from django.http import Http404
 import logging
 from .forms import ReviewForm
 
-
 # Create your views here.
 def home(request):
     return render(request, "home.html")
@@ -118,14 +117,13 @@ def search_spotify(request, query):
 
     return render(request, 'search_results.html', {'tracks': tracks})
 
+@login_required
 def song_detail(request, song_id):
-    
     client_credentials_manager = SpotifyClientCredentials(
         client_id=settings.SPOTIFY_API['CLIENT_ID'],
         client_secret=settings.SPOTIFY_API['CLIENT_SECRET']
     )
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
-
 
     try:
         # Retrieve song details using the song_id
@@ -161,6 +159,7 @@ def song_detail(request, song_id):
             review = form.save(commit=False)
             review.user = request.user
             review.song_id = song_id  # Use the song_id from the URL
+            review.edited = True  # Set the 'edited' flag to True
             review.save()
             return redirect('song_detail', song_id=song_id)
     else:
@@ -178,6 +177,8 @@ def song_detail(request, song_id):
         'song': song_details,
         'form': form,
         'reviews': reviews,
+        'edited': existing_review.edited if existing_review else False,  # Pass the 'edited' flag
+        'updated_created_at': existing_review.updated_at if existing_review else song.created_at if hasattr(song, 'created_at') else None,  # Pass updated created_at or song's created_at
     }
 
     return render(request, 'song_detail.html', context)
