@@ -20,6 +20,8 @@ from django.shortcuts import render, redirect
 from .models import Song, Like, Review
 from .forms import ReviewForm
 from django.http import Http404
+import logging
+from .forms import ReviewForm
 
 
 # Create your views here.
@@ -66,9 +68,9 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
     template_name = 'password_reset_complete.html'
 
 def profile_view(request):
-    
+    # Retrieve the user's reviews
     reviews = Review.objects.filter(user=request.user)
-    
+
     # Initialize Spotify client
     client_credentials_manager = SpotifyClientCredentials(
         client_id=settings.SPOTIFY_API['CLIENT_ID'],
@@ -76,35 +78,30 @@ def profile_view(request):
     )
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-    # Create an empty list to store song details for the user's reviews
+    # Create a list to store song details for each review
     reviewed_songs = []
 
-    # Fetch song details for each review
     for review in reviews:
+        # Retrieve the song details from Spotify using the song_id saved in the review
         try:
             song_details = sp.track(review.song_id)
         except spotipy.exceptions.SpotifyException as e:
             # Handle exceptions here if needed
             song_details = None
 
-        # Append the song details to the list
-        reviewed_songs.append(song_details)
+        # Create a dictionary with song details
+        song_info = {
+            'title': song_details['name'] if song_details else '',
+            'artist': song_details['artists'][0]['name'] if song_details else '',
+            # Add more song details here as needed
+        }
+        reviewed_songs.append(song_info)
 
-    # Include other profile information as needed
+    # Add other profile information as needed
     # ...
 
-    context = {
-        'reviews': reviews,
-        'reviewed_songs': reviewed_songs,  # Include the song details in the context
-        # Add other profile information here
-    }
+    return render(request, 'profile.html', {'reviews': reviews, 'reviewed_songs': reviewed_songs})
 
-    return render(request, 'profile.html', context)
-    
-
-# views.py
-
-# views.py
 def search_spotify(request, query):
     # Initialize Spotify client
     client_credentials_manager = SpotifyClientCredentials(
@@ -122,38 +119,66 @@ def search_spotify(request, query):
     return render(request, 'search_results.html', {'tracks': tracks})
 
 def song_detail(request, song_id):
-    # Initialize Spotify client
+    
     client_credentials_manager = SpotifyClientCredentials(
         client_id=settings.SPOTIFY_API['CLIENT_ID'],
         client_secret=settings.SPOTIFY_API['CLIENT_SECRET']
     )
     sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
+
     try:
         # Retrieve song details using the song_id
-        song = sp.track(song_id)
+        song_details = sp.track(song_id)
     except spotipy.exceptions.SpotifyException as e:
         # Handle exceptions here if needed
-        song = None
+        song_details = None
 
-    # Include the song_id and an empty ReviewForm in the context dictionary
-    context = {
-        'song': song,
-        'song_id': song_id,
-        'form': ReviewForm(),
-    }
+    # Check if the song already exists in the database based on song_id
+    song, created = Song.objects.get_or_create(
+        song_id=song_id,
+        defaults={
+            'title': song_details['name'],
+            'artist': song_details['artists'][0]['name'],
+            'album': song_details['album']['name'],
+            'cover_url': song_details['album']['images'][0]['url'],
+        }
+    )
+
+    # Check if the user has already reviewed the song
+    existing_review = Review.objects.filter(user=request.user, song_id=song_id).first()
 
     if request.method == 'POST':
-        form = ReviewForm(request.POST)
+        if existing_review:
+            # If the user has an existing review, update it
+            form = ReviewForm(request.POST, instance=existing_review)
+        else:
+            # If the user doesn't have an existing review, create a new one
+            form = ReviewForm(request.POST)
+
         if form.is_valid():
-            # Save the review to the database
+            # Save the updated or new review
             review = form.save(commit=False)
             review.user = request.user
-            review.song_id = song_id  # Associate the review with the song_id
+            review.song_id = song_id  # Use the song_id from the URL
             review.save()
-            # Redirect or return a success response
-        
-            # Handle the case where the form is not valid
+            return redirect('song_detail', song_id=song_id)
+    else:
+        if existing_review:
+            # If the user has an existing review, populate the form with their review
+            form = ReviewForm(instance=existing_review)
+        else:
+            # If the user doesn't have an existing review, create an empty form
+            form = ReviewForm()
+
+    # Filter reviews based on the song_id stored in each review
+    reviews = Review.objects.filter(song_id=song_id)
+
+    context = {
+        'song': song_details,
+        'form': form,
+        'reviews': reviews,
+    }
 
     return render(request, 'song_detail.html', context)
 
@@ -176,4 +201,3 @@ def like_song(request, song_id):
     # Redirect the user back to the song detail page
     return redirect('song_detail', song_id=song_id)
 
-from .forms import ReviewForm

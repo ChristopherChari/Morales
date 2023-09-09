@@ -1,6 +1,5 @@
 {% extends 'base.html' %}
 {% block content %}
-
 <div class="profile">
     <h2>{{ user.username }}'s Profile</h2>
     <p>Email: {{ user.email }}</p>
@@ -10,7 +9,8 @@
     <ul>
         {% for review in reviews %}
             <li>
-                <p><strong>Song:</strong> {{ review.song.title }}</p>
+                <p><strong>Song:</strong> {{ reviewed_songs.forloop.counter0.title }}</p>
+                <p><strong>Artist:</strong> {{ reviewed_songs.forloop.counter0.artist }}</p>
                 <p><strong>Review:</strong> {{ review.review_text }}</p>
                 <p><strong>Created At:</strong> {{ review.created_at }}</p>
             </li>

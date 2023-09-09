@@ -24,9 +24,5 @@ class Review(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f'Review by {self.user.username} for {self.song_id} at {self.created_at}'
-
-
-    def __str__(self):
         return f'{self.user.username} liked {self.song_id} at {self.created_at}'
     
