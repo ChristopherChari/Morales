@@ -24,6 +24,7 @@
         .edited-tag {
             color: red;  /* You can style the "edited" tag as needed */
         }
+      
     </style>
 </head>
 <body>
@@ -45,16 +46,62 @@
             <!-- Loop through and display reviews here -->
             {% for review in reviews %}
                 <p><strong>User:</strong> {{ review.user.username }}</p>
-                <p><strong>Review:</strong> {{ review.review_text }}</p>
+                <p data-review-text="{{ review.id }}"><strong>Review:</strong> {{ review.review_text }}</p>
                 <p><strong>Created At:</strong> {{ updated_created_at|date:"F d, Y, H:i A" }}{% if review.edited %} <span class="edited-tag">(Edited)</span>{% endif %}</p>
+                {% if request.user == review.user %}
+                    <!-- Show edit button for the user's reviews -->
+                    <button class="edit-button" data-review-id="{{ review.id }}">Edit</button>
+                {% endif %}
             {% endfor %}
-        
+            
             <!-- Add a form to submit a new review -->
-            <form method="post" action="">
+            {% if not has_submitted_review %}
+            <form id="review-form" class="review-form" method="post" action="">
                 {% csrf_token %}
                 <textarea name="review_text" rows="4" cols="50" placeholder="Write a review"></textarea>
-                <button type="submit">Submit Review</button>
+                <button id="submit-button" type="submit">Submit Review</button>
             </form>
+            {% endif %}
         </div>        
     </div>
+
+    <script>
+        // JavaScript to toggle review form and edit button
+        const editButtons = document.querySelectorAll('.edit-button');
+        const reviewForm = document.querySelector('.review-form'); // Select the review form by class
+        const submitButton = document.getElementById('submit-button'); // Select the submit button
+    
+        // Check if the user has already submitted a review
+        const hasSubmittedReview = document.querySelector('[data-review-text]') !== null;
+    
+        // Initially show the review form if the user has not submitted a review
+        if (!hasSubmittedReview) {
+            reviewForm.style.display = 'block';
+        } else {
+            // Hide the review form if the user has already submitted a review
+            reviewForm.style.display = 'none';
+        }
+    
+        editButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Get the review ID associated with the clicked edit button
+                const reviewId = button.getAttribute('data-review-id');
+    
+                // Fetch the review text for editing
+                const reviewText = document.querySelector(`[data-review-text="${reviewId}"]`).textContent;
+    
+                // Set the review text in the form for editing
+                document.querySelector('textarea[name="review_text"]').value = reviewText;
+    
+                // Show the review form when editing
+                reviewForm.style.display = 'block';
+            });
+        });
+    
+        // Add an event listener to hide the form after submission
+        submitButton.addEventListener('click', () => {
+            reviewForm.style.display = 'none'; // Hide the form after submission
+        });
+    </script>
 </body>
+</html>
