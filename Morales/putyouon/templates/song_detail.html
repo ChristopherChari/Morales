@@ -54,14 +54,12 @@
                 {% endif %}
             {% endfor %}
             
-            <!-- Add a form to submit a new review -->
-            {% if not has_submitted_review %}
+            <!-- Always show the review form -->
             <form id="review-form" class="review-form" method="post" action="">
                 {% csrf_token %}
                 <textarea name="review_text" rows="4" cols="50" placeholder="Write a review"></textarea>
                 <button id="submit-button" type="submit">Submit Review</button>
             </form>
-            {% endif %}
         </div>        
     </div>
 
@@ -72,7 +70,7 @@
         const submitButton = document.getElementById('submit-button'); // Select the submit button
     
         // Check if the user has already submitted a review
-        const hasSubmittedReview = document.querySelector('[data-review-text]') !== null;
+        const hasSubmittedReview = document.querySelector('[data-review-user]') !== null;
     
         // Initially show the review form if the user has not submitted a review
         if (!hasSubmittedReview) {
@@ -91,7 +89,7 @@
                 const reviewText = document.querySelector(`[data-review-text="${reviewId}"]`).textContent;
     
                 // Set the review text in the form for editing
-                document.querySelector('textarea[name="review_text"]').value = reviewText;
+                document.querySelector('textarea[name="review_text"]').value = review;
     
                 // Show the review form when editing
                 reviewForm.style.display = 'block';
