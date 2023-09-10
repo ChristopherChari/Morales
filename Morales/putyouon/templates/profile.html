@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load spotify_filters %}
 {% block content %}
 <div class="profile">
     <h2>{{ user.username }}'s Profile</h2>
@@ -8,11 +9,19 @@
     <h3>Reviews</h3>
     <ul>
         {% for review in reviews %}
-            <li>
-                <p><strong>Song:</strong> {{ reviewed_songs.forloop.counter0.title }}</p>
-                <p><strong>Artist:</strong> {{ reviewed_songs.forloop.counter0.artist }}</p>
+            <li> 
+                
+            {% with spotify_data=review.song_id|fetch_song_data_from_spotify %}
+                <div class="song-details">
+                    <img src="{{ spotify_data.album_cover_url }}" alt="{{ spotify_data.title }} Album Cover">
+                    <p><strong>Song:</strong> {{ spotify_data.title }}</p>
+                    <p><strong>Artist:</strong> {{ spotify_data.artist }}</p>
+                    <!-- Add more song details as needed -->
+                </div>
+            {% endwith %}
                 <p><strong>Review:</strong> {{ review.review_text }}</p>
                 <p><strong>Created At:</strong> {{ review.created_at }}</p>
+                
             </li>
         {% endfor %}
     </ul>
