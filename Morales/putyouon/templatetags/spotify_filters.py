@@ -34,6 +34,7 @@ def fetch_song_data_from_spotify(song_id):
 
             # Get album cover URL
             album_cover_url = song_details.get('album', {}).get('images', [])[0].get('url', '')
+            album_cover_small_url = song_details.get('album', {}).get('images', [])[2].get('url', '')  # Adjust the index as needed
 
             album_cover_small_url = song_details.get('album', {}).get('images', [])[2].get('url', '')  # Adjust the index as needed
 
@@ -42,6 +43,7 @@ def fetch_song_data_from_spotify(song_id):
                 'title': title,
                 'artist': artist,
                 'album_cover_url': album_cover_url,  # Add album cover URL
+                'album_cover_small_url': album_cover_small_url,  # Add small album cover URL
                 # Add more song details as needed
                 'album_cover_small_url': album_cover_small_url,  # Add small album cover URL
             }
