@@ -22,6 +22,8 @@ from .forms import ReviewForm
 from django.http import Http404
 import logging
 from .forms import ReviewForm
+from .models import Song, Review, Like
+from .forms import ReviewForm
 
 # Create your views here.
 def home(request):
@@ -146,43 +148,62 @@ def song_detail(request, song_id):
     # Check if the user has already reviewed the song
     existing_review = Review.objects.filter(user=request.user, song_id=song_id).first()
 
-    if request.method == 'POST':
-        if existing_review:
-            # If the user has an existing review, update it
-            form = ReviewForm(request.POST, instance=existing_review)
-        else:
-            # If the user doesn't have an existing review, create a new one
-            form = ReviewForm(request.POST)
+    # Check if the user has already liked the song
+    existing_like = Like.objects.filter(user=request.user, song_id=song_id).first()
 
-        if form.is_valid():
-            # Save the updated or new review
-            review = form.save(commit=False)
-            review.user = request.user
-            review.song_id = song_id  # Use the song_id from the URL
-            review.edited = True  # Set the 'edited' flag to True
-            review.save()
-            return redirect('song_detail', song_id=song_id)
+    if request.method == 'POST':
+        if 'like' in request.POST:
+            # Handle like/unlike action
+            if existing_like:
+                # If the user has an existing like, delete it to "unlike" the song
+                existing_like.delete()
+            else:
+                # If the user doesn't have an existing like, create a new one
+                like_form = LikeForm({'user': request.user.id, 'song_id': song_id})
+                if like_form.is_valid():
+                    like_form.save()
+
+        else:
+            # Handle review submission
+            if existing_review:
+                # If the user has an existing review, update it
+                review_form = ReviewForm(request.POST, instance=existing_review)
+            else:
+                # If the user doesn't have an existing review, create a new one
+                review_form = ReviewForm(request.POST)
+
+            if review_form.is_valid():
+                # Save the updated or new review
+                review = review_form.save(commit=False)
+                review.user = request.user
+                review.song_id = song_id  # Use the song_id from the URL
+                review.edited = True  # Set the 'edited' flag to True
+                review.save()
+
     else:
         if existing_review:
-            # If the user has an existing review, populate the form with their review
-            form = ReviewForm(instance=existing_review)
+            # If the user has an existing review, populate the review form with their review
+            review_form = ReviewForm(instance=existing_review)
         else:
-            # If the user doesn't have an existing review, create an empty form
-            form = ReviewForm()
+            # If the user doesn't have an existing review, create an empty review form
+            review_form = ReviewForm()
 
     # Filter reviews based on the song_id stored in each review
     reviews = Review.objects.filter(song_id=song_id)
 
     context = {
         'song': song_details,
-        'form': form,
+        'review_form': review_form,
         'reviews': reviews,
         'edited': existing_review.edited if existing_review else False,  # Pass the 'edited' flag
         'updated_created_at': existing_review.updated_at if existing_review else song.created_at if hasattr(song, 'created_at') else None,  # Pass updated created_at or song's created_at
+        'liked': existing_like is not None,  # Pass whether the user has liked the song
+        'song_id': song_id,  # Include the song_id in the context
     }
 
     return render(request, 'song_detail.html', context)
 
+@login_required
 def like_song(request, song_id):
     if request.method == 'POST':
         # Check if the user is logged in
@@ -191,14 +212,20 @@ def like_song(request, song_id):
             song = Song.objects.get(song_id=song_id)
 
             # Check if the user has already liked the song
-            if not Like.objects.filter(user=request.user, song_id=song_id).exists():
-                # Create a new Like object
-                Like.objects.create(user=request.user, song_id=song_id)
+            like, created = Like.objects.get_or_create(user=request.user, song_id=song_id)
+
+
+            # Determine whether the user liked or unliked the song
+            liked = not created
+
+            like_count = Like.objects.filter(song_id=song_id).count()
+
+
+            return JsonResponse({'liked': liked})
         else:
             # Redirect the user to the login page or show a message
             # You can customize this part based on your preference
             return redirect('login')
 
-    # Redirect the user back to the song detail page
-    return redirect('song_detail', song_id=song_id)
 
+    return JsonResponse({'liked': liked, 'like_count': like_count})

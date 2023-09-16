@@ -60,10 +60,76 @@
                 <textarea name="review_text" rows="4" cols="50" placeholder="Write a review"></textarea>
                 <button id="submit-button" type="submit">Submit Review</button>
             </form>
-        </div>        
+        </div> 
+        
+        <div class="like-section">
+            <button id="like-button" data-song-id="{{ song_id }}" data-liked="{{ liked|lower }}">Like</button>
+            <span id="like-count">{{ like_count }}</span>
+        </div>
+
     </div>
 
     <script>
+        // Define a function to get a cookie by name
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    // Check if the cookie name matches the one you're looking for
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+
+        
+       
+        // JavaScript to handle liking a song and displaying like count
+        const likeButton = document.getElementById('like-button');
+        const likeCountElement = document.getElementById('like-count');
+        const songId = likeButton.getAttribute('data-song-id');
+        // const songId = '7aRCf5cLOFN1U7kvtChY1G'; // Replace with the actual song ID
+        let isLiked = JSON.parse(likeButton.getAttribute('data-liked'));
+        const csrftoken = getCookie('csrftoken');
+
+        // Function to update the like count on the page
+        const updateLikeCount = (count) => {
+            likeCountElement.textContent = count;
+        };
+
+        likeButton.addEventListener('click', () => {
+            fetch(`/like_song/${songId}/`, { method: 'POST', headers: {'X-CSRFToken': csrftoken}, })
+                .then(response => response.json())
+                .then(data => {
+                    isLiked = data.liked; // Update the liked status
+                    if (isLiked) {
+                        likeButton.textContent = 'Unlike';
+                    } else {
+                        likeButton.textContent = 'Like';
+                    }
+                    likeButton.setAttribute('data-liked', isLiked);
+                    updateLikeCount(data.like_count); // Update the like count
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+
+        // Set the initial button text and like count based on the user's like status
+        if (isLiked) {
+            likeButton.textContent = 'Unlike';
+        } else {
+            likeButton.textContent = 'Like';
+        }
+        updateLikeCount(initial_like_count); // Replace 'initial_like_count' with the actual initial like count for the song
+
+
         // JavaScript to toggle review form and edit button
         const editButtons = document.querySelectorAll('.edit-button');
         const reviewForm = document.querySelector('.review-form'); // Select the review form by class
