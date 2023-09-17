@@ -17,5 +17,6 @@ urlpatterns = [
     path('profile/', views.profile_view, name='profile'),
     path('search/<str:query>/', views.search_spotify, name='search_spotify'),
     path('song/<str:song_id>/', views.song_detail, name='song_detail'),
-    path('like_song/<str:song_id>/', views.like_song, name='like_song')
+    path('like_song/<str:song_id>/', views.like_song, name='like_song'),
+    path('search_results/', views.search_spotify, name='search_results')
 ]

@@ -100,7 +100,6 @@ def profile_view(request):
         song_info = {
             'title': song_details['name'] if song_details else '',
             'artist': song_details['artists'][0]['name'] if song_details else '',
-            
             # Add more song details here as needed
         }
         reviewed_songs.append(song_info)
@@ -110,21 +109,32 @@ def profile_view(request):
 
     return render(request, 'profile.html', {'reviews': reviews, 'reviewed_songs': reviewed_songs, 'liked_songs': liked_songs})
 
-def search_spotify(request, query):
-    # Initialize Spotify client
-    client_credentials_manager = SpotifyClientCredentials(
-        client_id=settings.SPOTIFY_API['CLIENT_ID'],
-        client_secret=settings.SPOTIFY_API['CLIENT_SECRET']
-    )
-    sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+def search_spotify(request):
+    query = request.GET.get('q', '')
+    
+    if query:
+        # Initialize Spotify client
+        client_credentials_manager = SpotifyClientCredentials(
+            client_id=settings.SPOTIFY_API['CLIENT_ID'],
+            client_secret=settings.SPOTIFY_API['CLIENT_SECRET']
+        )
+        sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 
-    # Make a Spotify API request (example: search for tracks)
-    results = sp.search(q=query, type='track', limit=10)
+        # Make a Spotify API request (example: search for tracks)
+        results = sp.search(q=query, type='track', limit=10)
 
-    # Extract relevant data from the results
-    tracks = results.get('tracks', {}).get('items', [])
+        # Extract relevant data from the results
+        tracks = results.get('tracks', {}).get('items', [])
+    else:
+        # No query provided, return an empty list of tracks
+        tracks = []
 
-    return render(request, 'search_results.html', {'tracks': tracks})
+    context = {
+        'query': query,
+        'tracks': tracks,
+    }
+
+    return render(request, 'search_results.html', context)
 
 @login_required
 def song_detail(request, song_id):

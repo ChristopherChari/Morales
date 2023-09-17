@@ -1,4 +1,12 @@
-{% extends 'base.html' %}{%block title%} Home Page {%endblock%}
-{%block content%}
-<p>this is the home page,</p>
-{%endblock%}
+{% extends 'base.html' %}
+{% block title %} Home Page {% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Search for Songs</h1>
+    <form id="search-form" action="{% url 'search_results' %}" method="GET">
+        <input type="text" id="search-query" name="q" placeholder="Enter a song name">
+        <button type="submit">Search</button>
+    </form>
+</div>
+{% endblock %}
