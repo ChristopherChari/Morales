@@ -33,6 +33,10 @@
     <div class="song-details">
         <div class="album-cover">
             <img src="{{ song.album.images.0.url }}" alt="{{ song.album.name }} Album Cover">
+            <div class="like-section">
+                <button id="like-button" data-song-id="{{ song_id }}" data-liked="{{ liked|lower }}">Like</button>
+                <span id="like-count">{{ like_count }}</span>
+            </div>
         </div>
         <div class="song-info">
             <p><strong>Name:</strong> {{ song.name }}</p>
@@ -69,11 +73,6 @@
             {% endif %}
 
         </div> 
-        
-        <div class="like-section">
-            <button id="like-button" data-song-id="{{ song_id }}" data-liked="{{ liked|lower }}">Like</button>
-            <span id="like-count">{{ like_count }}</span>
-        </div>
     </div>
 
     <script>
