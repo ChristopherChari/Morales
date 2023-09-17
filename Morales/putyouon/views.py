@@ -211,21 +211,26 @@ def like_song(request, song_id):
             # Get the song object
             song = Song.objects.get(song_id=song_id)
 
-            # Check if the user has already liked the song
-            like, created = Like.objects.get_or_create(user=request.user, song_id=song_id)
-
-
-            # Determine whether the user liked or unliked the song
-            liked = not created
+            try:
+                # Try to get an existing like for this user and song
+                like = Like.objects.get(user=request.user, song_id=song_id)
+                
+                # If the like exists, delete it (unlike)
+                like.delete()
+                
+                liked = False  # The user unliked the song
+            except Like.DoesNotExist:
+                # If the like does not exist, create it (like)
+                Like.objects.create(user=request.user, song_id=song_id)
+                
+                liked = True  # The user liked the song
 
             like_count = Like.objects.filter(song_id=song_id).count()
 
-
-            return JsonResponse({'liked': liked})
+            return JsonResponse({'liked': liked, 'like_count': like_count})
         else:
             # Redirect the user to the login page or show a message
             # You can customize this part based on your preference
             return redirect('login')
-
 
     return JsonResponse({'liked': liked, 'like_count': like_count})
