@@ -147,6 +147,7 @@ def song_detail(request, song_id):
     try:
         # Retrieve song details using the song_id
         song_details = sp.track(song_id)
+        track_id = song_details['id']
     except spotipy.exceptions.SpotifyException as e:
         # Handle exceptions here if needed
         song_details = None
@@ -216,6 +217,7 @@ def song_detail(request, song_id):
         'updated_created_at': existing_review.updated_at if existing_review else song.created_at if hasattr(song, 'created_at') else None,  # Pass updated created_at or song's created_at
         'liked': existing_like is not None,  # Pass whether the user has liked the song
         'song_id': song_id,  # Include the song_id in the context
+        'track_id': track_id
     }
 
     return render(request, 'song_detail.html', context)

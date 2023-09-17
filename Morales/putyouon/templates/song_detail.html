@@ -60,13 +60,20 @@
                 <textarea name="review_text" rows="4" cols="50" placeholder="Write a review"></textarea>
                 <button id="submit-button" type="submit">Submit Review</button>
             </form>
+
+            {% if track_id %}
+            <div>
+                <h2>Listen to a Snippet</h2>
+                <iframe src="https://open.spotify.com/embed/track/{{ track_id }}" width="300" height="80" frameborder="0" allowtransparency="true" allow="encrypted-media"></iframe>
+            </div>
+            {% endif %}
+
         </div> 
         
         <div class="like-section">
             <button id="like-button" data-song-id="{{ song_id }}" data-liked="{{ liked|lower }}">Like</button>
             <span id="like-count">{{ like_count }}</span>
         </div>
-
     </div>
 
     <script>
