@@ -6,6 +6,28 @@
     <p>Email: {{ user.email }}</p>
     <!-- Add more profile information here as needed -->
 
+    <h3>Liked Songs</h3>
+    <ul>
+        {% for song_id in liked_songs %}
+            <li>
+                {% with spotify_data=song_id|fetch_song_data_from_spotify %}
+
+                <!-- Check if song data is available -->
+                {% if spotify_data %}
+                    <img src="{{ spotify_data.album_cover_small_url }}" alt="{{ spotify_data.title }} Album Cover">
+                    <p><strong>Song:</strong> {{ spotify_data.title }}</p>
+                    <p><strong>Artist:</strong> {{ spotify_data.artist }}</p>
+                    <!-- Add more song details as needed -->
+                {% else %}
+                    <p><strong>Song ID:</strong> {{ song_id }}</p>
+                    <p><em>Song details not available</em></p>
+                {% endif %}
+
+                {% endwith %}
+            </li>
+        {% endfor %}
+    </ul>
+
     <h3>Reviews</h3>
     <ul>
         {% for review in reviews %}

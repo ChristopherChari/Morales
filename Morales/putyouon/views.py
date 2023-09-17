@@ -71,6 +71,12 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
 def profile_view(request):
     # Retrieve the user's reviews
     reviews = Review.objects.filter(user=request.user)
+    user = request.user
+    liked_songs = Like.objects.filter(user=user).values_list('song_id', flat=True)
+    context = {
+        'user': user,
+        'liked_songs': liked_songs,
+    }
 
     # Initialize Spotify client
     client_credentials_manager = SpotifyClientCredentials(
@@ -94,6 +100,7 @@ def profile_view(request):
         song_info = {
             'title': song_details['name'] if song_details else '',
             'artist': song_details['artists'][0]['name'] if song_details else '',
+            
             # Add more song details here as needed
         }
         reviewed_songs.append(song_info)
@@ -101,7 +108,7 @@ def profile_view(request):
     # Add other profile information as needed
     # ...
 
-    return render(request, 'profile.html', {'reviews': reviews, 'reviewed_songs': reviewed_songs})
+    return render(request, 'profile.html', {'reviews': reviews, 'reviewed_songs': reviewed_songs, 'liked_songs': liked_songs})
 
 def search_spotify(request, query):
     # Initialize Spotify client
