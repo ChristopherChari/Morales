@@ -1,51 +1,92 @@
 {% extends 'base.html' %}
 {% load spotify_filters %}
 {% block content %}
+<style>
+    /* Update the background colors with the provided hex codes */
+    body {
+        background-color: #6528F7;
+        color: #EDE4FF; /* Text color */
+    }
+
+    /* Add more styles for the profile page as needed */
+    .profile {
+        background-color: #A076F9;
+        padding: 20px;
+    }
+
+    /* Style the liked songs and reviews sections */
+    .liked-songs {
+        background-color: #D7BBF5;
+        padding: 20px;
+    }
+
+    .reviews {
+        background-color: #EDE4FF;
+        padding: 20px;
+        color: black;
+    }
+
+    /* Style the song details within liked songs and reviews */
+    .song-details {
+        display: flex;
+        align-items: center;
+    }
+
+    .song-details img {
+      
+    }
+
+    /* Add more specific styles as needed */
+</style>
+
 <div class="profile">
     <h2>{{ user.username }}'s Profile</h2>
     <p>Email: {{ user.email }}</p>
     <!-- Add more profile information here as needed -->
 
-    <h3>Liked Songs</h3>
-    <ul>
-        {% for song_id in liked_songs %}
-            <li>
-                {% with spotify_data=song_id|fetch_song_data_from_spotify %}
-
-                <!-- Check if song data is available -->
-                {% if spotify_data %}
-                    <img src="{{ spotify_data.album_cover_small_url }}" alt="{{ spotify_data.title }} Album Cover">
-                    <p><strong>Song:</strong> {{ spotify_data.title }}</p>
-                    <p><strong>Artist:</strong> {{ spotify_data.artist }}</p>
-                    <!-- Add more song details as needed -->
-                {% else %}
-                    <p><strong>Song ID:</strong> {{ song_id }}</p>
-                    <p><em>Song details not available</em></p>
-                {% endif %}
-
-                {% endwith %}
-            </li>
-        {% endfor %}
-    </ul>
-
-    <h3>Reviews</h3>
-    <ul>
-        {% for review in reviews %}
-            <li> 
-                
-            {% with spotify_data=review.song_id|fetch_song_data_from_spotify %}
-                <div class="song-details">
-                    <img src="{{ spotify_data.album_cover_url }}" alt="{{ spotify_data.title }} Album Cover">
-                    <p><strong>Song:</strong> {{ spotify_data.title }}</p>
-                    <p><strong>Artist:</strong> {{ spotify_data.artist }}</p>
-                    <!-- Add more song details as needed -->
-                </div>
-            {% endwith %}
-                <p><strong>Review:</strong> {{ review.review_text }}</p>
-                <p><strong>Created At:</strong> {{ review.created_at }}</p>
-                
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="liked-songs">
+        <h3>Liked Songs</h3>
+        <ul>
+            {% for song_id in liked_songs %}
+                <li>
+                    {% with spotify_data=song_id|fetch_song_data_from_spotify %}
+                        <!-- Check if song data is available -->
+                        {% if spotify_data %}
+                            <div class="song-details">
+                                <img src="{{ spotify_data.album_cover_small_url }}" alt="{{ spotify_data.title }} Album Cover">
+                                <!-- Add more song details as needed -->
+                            </div>
+                            <p><strong>Song:</strong> {{ spotify_data.title }}</p>
+                            <p><strong>Artist:</strong> {{ spotify_data.artist }}</p>
+                        {% else %}
+                            <p><strong>Song ID:</strong> {{ song_id }}</p>
+                            <p><em>Song details not available</em></p>
+                        {% endif %}
+                    {% endwith %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+    
+    <div class="reviews">
+        <h3>Reviews</h3>
+        <ul>
+            {% for review in reviews %}
+                <li> 
+                    {% with spotify_data=review.song_id|fetch_song_data_from_spotify %}
+                        <div class="song-details">
+                            <img src="{{ spotify_data.album_cover_url }}" alt="{{ spotify_data.title }} Album Cover">
+                            <!-- Add more song details as needed -->
+                        </div>
+                        <p><strong>Song:</strong> {{ spotify_data.title }}</p>
+                        <p><strong>Artist:</strong> {{ spotify_data.artist }}</p>
+                        
+                    {% endwith %}
+                    <p><strong>Review:</strong> {{ review.review_text }}</p>
+                    <p><strong>Created At:</strong> {{ review.created_at }}</p>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
 </div>
 {% endblock %}
